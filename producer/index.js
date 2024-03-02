@@ -12,12 +12,52 @@ async function initProducer() {
     return producer;
 }
 
+const countries = [
+    'Algeria',
+    'Argentina',
+    'Bangladesh',
+    'Central African Republic',
+    'Chad',
+    'Congo DR',
+    'Cuba',
+    'Gambia',
+    'Ghana',
+    'Guinea Bissau',
+    'Iraq',
+    'Kiribati',
+    'Lao PDR',
+    'Lesotho',
+    'Madagascar',
+    'Malawi',
+    'Mongolia',
+    'Nepal',
+    'Pakistan (Azad Jammu and Kashmir)',
+    'Pakistan (Khyber Pakhtunkhwa)',
+    'Pakistan (Punjab)',
+    'Pakistan (Sindh)',
+    'Samoa',
+    'Sao Tome and Principe',
+    'Sierra Leone',
+    'State of Palestine',
+    'Suriname',
+    'Togo',
+    'Tonga',
+    'Tunisia',
+    'Turkmenistan',
+    'Turks and Caicos Islands',
+    'Tuvalu',
+    'Viet Nam',
+    'Zimbabwe',
+  ];
+
 async function produceMessage(producer) {
     const message = JSON.stringify({
         id: faker.string.uuid(),
         name: faker.person.fullName(),
-        country: faker.location.country(),
+        country: faker.helpers.arrayElement(countries),
         gender: faker.helpers.arrayElement(["Male", "Female"]),
+        address: faker.location.streetAddress(),
+        Copied_or_moved_a_file_or_folder: faker.number.float({min: 0, max: 1}),
     });
 
     await producer.send({
