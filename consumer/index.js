@@ -1,4 +1,7 @@
 const { Kafka } = require('kafkajs')
+const dotenv = require('dotenv');
+dotenv.config();
+
 const { Category, SubmitLog, Summary } = require('./models')
 
 async function customUpsert(model, values, condition) {
