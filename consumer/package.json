@@ -11,6 +11,8 @@
   "dependencies": {
     "fastify": "^4.26.1",
     "kafkajs": "^2.2.4",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "sequelize": "^6.37.1",
+    "sequelize-cli": "^6.6.2"
   }
 }
