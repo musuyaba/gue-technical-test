@@ -1,39 +1,47 @@
-const { Kafka } = require('kafkajs')
+const { Kafka } = require('kafkajs');
 const { faker } = require('@faker-js/faker');
 
-const init = async function initProducer() {
+async function initProducer() {
     const kafka = new Kafka({
         clientId: 'producer-node-1',
         brokers: ['localhost:9092'],
-    })
+    });
 
-    return kafka.producer()
+    const producer = kafka.producer();
+    await producer.connect();
+    return producer;
 }
 
-const produce = async function produceMessage(producer) {
-    await producer.connect()
+async function produceMessage(producer) {
+    const message = JSON.stringify({
+        id: faker.string.uuid(),
+        name: faker.person.fullName(),
+        country: faker.location.country(),
+        gender: faker.helpers.arrayElement(["Male", "Female"]),
+    });
+
     await producer.send({
         topic: 'test-topic',
-        messages: [
-            {
-                value: {
-                    id: faker.random.uuid(),
-                    name: faker.name.findName(),
-                    country: faker.address.country(),
-                    gender: faker.random.arrayElement(["Male", "Female", "Other"]),
-                }
-            },
-        ],
-    })
+        messages: [{ key: faker.string.uuid(), value: message }],
+    });
+
+    console.log("Message produced:", message);
 }
 
-const disconnect = async function disconnectProducer(producer) {
-    await producer.disconnect()
+async function runProducer() {
+    const producer = await initProducer();
+
+    const intervalId = setInterval(async () => {
+        await produceMessage(producer).catch(console.error);
+    }, 5000);
+
+    const shutdown = async () => {
+        clearInterval(intervalId);
+        await producer.disconnect();
+        console.log("Producer disconnected.");
+    };
+
+    process.on('SIGINT', shutdown);
 }
 
-const producerClient = init().catch(console.error)
-setInterval(() => {
-    produce(producerClient).catch(console.error)
-}, 5000);
-
-disconnect(producerClient).catch(console.error)
+runProducer().catch(console.error);
