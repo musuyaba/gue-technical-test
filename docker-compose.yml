@@ -1,0 +1,107 @@
+version: '3.7'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_PORT}
+      ZOOKEEPER_TICK_TIME: 2000
+
+  broker1:
+    user: root
+    hostname: broker1
+    container_name: broker1
+    restart: on-failure
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "${KAFKA_BROKER_INTERNAL_PORT}:${KAFKA_BROKER_INTERNAL_PORT}"
+      - "${KAFKA_BROKER_EXTERNAL_PORT}:${KAFKA_BROKER_EXTERNAL_PORT}"
+      - "${KAFKA_JMX_PORT}:${KAFKA_JMX_PORT}"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:${KAFKA_BROKER_EXTERNAL_PORT},PLAINTEXT_HOST://localhost:${KAFKA_BROKER_INTERNAL_PORT}
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_PORT}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: ${KAFKA_JMX_PORT}
+      KAFKA_JMX_HOSTNAME: localhost
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.5.0
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - broker1
+    ports:
+      - "${SCHEMA_REGISTRY_PORT}:${SCHEMA_REGISTRY_PORT}"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker1:${KAFKA_BROKER_EXTERNAL_PORT},broker2:${KAFKA_BROKER_EXTERNAL_PORT_2}'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:${SCHEMA_REGISTRY_PORT}
+
+  postgresql:
+    image: postgres:latest
+    hostname: postgresql
+    container_name: postgresql
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: "${POSTGRESQL_DB}"
+      POSTGRES_USER: "${POSTGRESQL_USER}"
+      POSTGRES_PASSWORD: "${POSTGRESQL_PASSWORD}"
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+
+  conduktor-platform:
+    image: conduktor/conduktor-platform:1.19.2
+    hostname: conduktor-platform
+    container_name: conduktor-platform
+    depends_on:
+      - postgresql
+      - broker1
+    ports:
+      - "${CONDUKTOR_PLATFORM_PORT}:${CONDUKTOR_PLATFORM_PORT}"
+    volumes:
+      - conduktor_data:/var/conduktor
+    environment:
+      CDK_DATABASE_URL: "postgresql://${POSTGRESQL_USER}:${POSTGRESQL_PASSWORD}@postgresql:5432/${POSTGRESQL_DB}"
+      CDK_MONITORING_CORTEX-URL: http://conduktor-monitoring:${CDK_MONITORING_CORTEX_PORT}/
+      CDK_MONITORING_ALERT-MANAGER-URL: http://conduktor-monitoring:${CDK_MONITORING_ALERT_PORT}/
+      CDK_MONITORING_CALLBACK-URL: http://conduktor-platform:${CONDUKTOR_PLATFORM_PORT}/monitoring/api/
+      CDK_MONITORING_NOTIFICATIONS-CALLBACK-URL: http://localhost:${CONDUKTOR_PLATFORM_PORT}
+    healthcheck:
+      test: curl -f http://localhost:${CONDUKTOR_PLATFORM_PORT}/platform/api/modules/health/live || exit 1
+      interval: 10s
+      start_period: 10s
+      timeout: 5s
+      retries: 3
+
+  conduktor-monitoring:
+    image: conduktor/conduktor-platform-cortex:1.19.2
+    container_name: conduktor-monitoring
+    environment:
+      CDK_CONSOLE-URL: "http://conduktor-platform:${CONDUKTOR_PLATFORM_PORT}"
+      
+  # nginx:
+  #   image: nginx:latest
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - rest-proxy
+  #     - ksqldb-server
+  #     - schema-registry
+
+volumes:
+  pg_data:
+  conduktor_data:
