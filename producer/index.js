@@ -1,5 +1,8 @@
+const dotenv = require('dotenv');
 const { Kafka } = require('kafkajs');
 const { faker } = require('@faker-js/faker');
+
+dotenv.config();
 
 async function initProducer() {
     const kafka = new Kafka({
@@ -48,7 +51,7 @@ const countries = [
     'Tuvalu',
     'Viet Nam',
     'Zimbabwe',
-  ];
+];
 
 async function produceMessage(producer) {
     const message = JSON.stringify({
@@ -57,7 +60,16 @@ async function produceMessage(producer) {
         country: faker.helpers.arrayElement(countries),
         gender: faker.helpers.arrayElement(["Male", "Female"]),
         address: faker.location.streetAddress(),
-        Copied_or_moved_a_file_or_folder: faker.number.float({min: 0, max: 1}),
+        Copied_or_moved_a_file_or_folder: faker.number.float({ min: 0, max: 1 }),
+        Used_a_copy_and_paste_tool_to_duplicate_or_move_information_within_a_document: faker.number.float({ min: 0, max: 1 }),
+        Sent_email_with_attached_file: faker.number.float({ min: 0, max: 1 }),
+        Used_basic_arithmetic_formula_in_spreadsheet: faker.number.float({ min: 0, max: 1 }),
+        Connected_and_installed_new_device: faker.number.float({ min: 0, max: 1 }),
+        Found_downloaded_installed_and_configured_software: faker.number.float({ min: 0, max: 1 }),
+        Created_electronic_presentation_with_presentation_software: faker.number.float({ min: 0, max: 1 }),
+        Transferred_file_between_computer_and_other_device: faker.number.float({ min: 0, max: 1 }),
+        Wrote_computer_program_in_any_programming_language: faker.number.float({ min: 0, max: 1 }),
+        Performed_at_least_one_out_of_nine_activities: faker.number.float({ min: 0, max: 1 }),
     });
 
     await producer.send({
@@ -73,7 +85,7 @@ async function runProducer() {
 
     const intervalId = setInterval(async () => {
         await produceMessage(producer).catch(console.error);
-    }, 5000);
+    }, process.env.DUMMY_INTERVAL);
 
     const shutdown = async () => {
         clearInterval(intervalId);
