@@ -2,3 +2,5 @@
 *.db
 *.pdf
 *.xlsx
+
+**/node_modules
