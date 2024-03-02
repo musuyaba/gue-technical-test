@@ -1,5 +1,10 @@
 const { Kafka } = require('kafkajs')
+const fastify = require('fastify')({ logger: true })
 
+
+const populate = async function populateDatabase() {
+
+}
 const consume = async function consumeTopic() {
     const kafka = new Kafka({
         clientId: 'consumer-node-1',
@@ -22,3 +27,14 @@ const consume = async function consumeTopic() {
 }
 
 consume().catch(console.error)
+
+fastify.get('/', function handler(request, reply) {
+    reply.send({ hello: 'world' })
+})
+
+fastify.listen({ port: 3000 }, (err) => {
+    if (err) {
+        fastify.log.error(err)
+        process.exit(1)
+    }
+})
