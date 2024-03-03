@@ -1,4 +1,4 @@
-export const customUpsert = async function customUpsert(model, values, condition) {
+const customUpsert = async function customUpsert(model, values, condition) {
     condition = condition || values;
     const foundItem = await model.findOne({ where: condition });
 
@@ -10,3 +10,5 @@ export const customUpsert = async function customUpsert(model, values, condition
         return { item: await model.findOne({ where: condition }), created: false };
     }
 }
+
+module.exports = { customUpsert }
