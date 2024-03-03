@@ -84,14 +84,14 @@ async function setRealTimeAggregate(value) {
 
 const consume = async function consumeTopic() {
     const kafka = new Kafka({
-        clientId: 'consumer-node-1',
+        clientId: 'consumer-ingestion2datalake-1',
         brokers: ['localhost:9092'],
     })
 
     const consumer = kafka.consumer({ groupId: 'network-1' })
 
     await consumer.connect()
-    await consumer.subscribe({ topic: 'test-topic', fromBeginning: true })
+    await consumer.subscribe({ topic: process.env.TOPIC, fromBeginning: true })
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {

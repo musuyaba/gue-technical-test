@@ -10,14 +10,13 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+     models.Summary.belongsTo(models.Category, {
+       foreignKey: 'Category_id',
+       as: 'category'
+     });
     }
   }
   Summary.init({
-    Country: DataTypes.STRING,
-    ISO3: DataTypes.STRING,
-    UNICEF_Region: DataTypes.STRING,
-    Sex: DataTypes.STRING,
     Copied_or_moved_a_file_or_folder: DataTypes.FLOAT,
     Used_a_copy_and_paste_tool_to_duplicate_or_move_information_within_a_document: DataTypes.FLOAT,
     Sent_email_with_attached_file: DataTypes.FLOAT,
@@ -29,7 +28,8 @@ module.exports = (sequelize, DataTypes) => {
     Wrote_computer_program_in_any_programming_language: DataTypes.FLOAT,
     Performed_at_least_one_out_of_nine_activities: DataTypes.FLOAT,
     Source: DataTypes.STRING,
-    Year: DataTypes.STRING
+    Year: DataTypes.STRING,
+    Category_id: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'Summary',

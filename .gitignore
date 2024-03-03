@@ -2,6 +2,6 @@
 *.db
 *.pdf
 *.xlsx
-consumer/config/config.json
+**/config/config.json
 
 **/node_modules
