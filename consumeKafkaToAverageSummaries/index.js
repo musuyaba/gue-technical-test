@@ -41,19 +41,18 @@ async function averageSummaries(producer, message) {
             }
         });
 
-        if (!createdSummary && Object.keys(updatedValues).length > 0) {
-            await Summary.update(updatedValues, { where: condition });
-        }
-
-        console.log(updatedValues);
-        // if (category) {
-        //     value.category = category.dataValues;
-        //     await sendMessage(producer, process.env.TOPIC_PRODUCER, [{ key: key, value: JSON.stringify(value) }]);
-        // } else {
-        //     console.error("Category not found! Please check NEW_CATEGORY env variable!");
+        // if (!createdSummary && Object.keys(updatedValues).length > 0) {
+        //     await Summary.update(updatedValues, { where: condition });
         // }
+
+        if (summary) {
+            value.summary = summary.dataValues;
+            await sendMessage(producer, process.env.TOPIC_PRODUCER, [{ key: key, value: JSON.stringify(value) }]);
+        } else {
+            console.error("Summary not found!");
+        }
     } catch (error) {
-        console.error("Error checking category:", error);
+        console.error("Error checking summary:", error);
     }
 
 }
