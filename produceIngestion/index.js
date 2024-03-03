@@ -68,7 +68,7 @@ async function produceMessage(producer) {
 }
 
 async function runProducer() {
-    const producer = await initProducer(process.env.CLIENT_ID, process.env.BROKER);
+    const producer = await initProducer(process.env.CLIENT_ID, process.env.BROKERS);
 
     const intervalId = setInterval(async () => {
         await produceMessage(producer).catch(console.error);
