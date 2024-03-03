@@ -23,6 +23,8 @@ async function insertSubmitLog(message) {
         Wrote_computer_program_in_any_programming_language: message?.Wrote_computer_program_in_any_programming_language,
         Performed_at_least_one_out_of_nine_activities: message?.Performed_at_least_one_out_of_nine_activities
     })
+
+    console.log('Inserted message to database', message);
 }
 
 
