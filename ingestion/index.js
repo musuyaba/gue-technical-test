@@ -73,7 +73,7 @@ async function produceMessage(producer) {
     });
 
     await producer.send({
-        topic: 'test-topic',
+        topic: process.env.TOPIC,
         messages: [{ key: faker.string.uuid(), value: message }],
     });
 
