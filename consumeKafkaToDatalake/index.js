@@ -7,21 +7,24 @@ const { initConsumer } = require('./helpers/initConsumer')
 // const { initProducer } = require('./helpers/initProducer')
 
 async function insertSubmitLog(message) {
+    value = JSON.parse(message?.value.toString())
+    key = JSON.parse(message?.key.toString())
     SubmitLog.create({
-        Name: message?.name,
-        Address: message?.address,
-        Country: message?.country,
-        Sex: message?.gender,
-        Copied_or_moved_a_file_or_folder: message?.Copied_or_moved_a_file_or_folder,
-        Used_a_copy_and_paste_tool_to_duplicate_or_move_information_within_a_document: message?.Used_a_copy_and_paste_tool_to_duplicate_or_move_information_within_a_document,
-        Sent_email_with_attached_file: message?.Sent_email_with_attached_file,
-        Used_basic_arithmetic_formula_in_spreadsheet: message?.Used_basic_arithmetic_formula_in_spreadsheet,
-        Connected_and_installed_new_device: message?.Connected_and_installed_new_device,
-        Found_downloaded_installed_and_configured_software: message?.Found_downloaded_installed_and_configured_software,
-        Created_electronic_presentation_with_presentation_software: message?.Created_electronic_presentation_with_presentation_software,
-        Transferred_file_between_computer_and_other_device: message?.Transferred_file_between_computer_and_other_device,
-        Wrote_computer_program_in_any_programming_language: message?.Wrote_computer_program_in_any_programming_language,
-        Performed_at_least_one_out_of_nine_activities: message?.Performed_at_least_one_out_of_nine_activities
+        key: key,
+        Name: value?.name,
+        Address: value?.address,
+        Country: value?.country,
+        Sex: value?.gender,
+        Copied_or_moved_a_file_or_folder: value?.Copied_or_moved_a_file_or_folder,
+        Used_a_copy_and_paste_tool_to_duplicate_or_move_information_within_a_document: value?.Used_a_copy_and_paste_tool_to_duplicate_or_move_information_within_a_document,
+        Sent_email_with_attached_file: value?.Sent_email_with_attached_file,
+        Used_basic_arithmetic_formula_in_spreadsheet: value?.Used_basic_arithmetic_formula_in_spreadsheet,
+        Connected_and_installed_new_device: value?.Connected_and_installed_new_device,
+        Found_downloaded_installed_and_configured_software: value?.Found_downloaded_installed_and_configured_software,
+        Created_electronic_presentation_with_presentation_software: value?.Created_electronic_presentation_with_presentation_software,
+        Transferred_file_between_computer_and_other_device: value?.Transferred_file_between_computer_and_other_device,
+        Wrote_computer_program_in_any_programming_language: value?.Wrote_computer_program_in_any_programming_language,
+        Performed_at_least_one_out_of_nine_activities: value?.Performed_at_least_one_out_of_nine_activities
     })
 
     console.log('Inserted message to database', message);
@@ -35,7 +38,6 @@ const consume = async function consumeTopic() {
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-            message = JSON.parse(message?.value.toString())
             insertSubmitLog(message)
         },
     })

@@ -28,7 +28,8 @@ module.exports = (sequelize, DataTypes) => {
     Created_electronic_presentation_with_presentation_software: DataTypes.FLOAT,
     Transferred_file_between_computer_and_other_device: DataTypes.FLOAT,
     Wrote_computer_program_in_any_programming_language: DataTypes.FLOAT,
-    Performed_at_least_one_out_of_nine_activities: DataTypes.FLOAT
+    Performed_at_least_one_out_of_nine_activities: DataTypes.FLOAT,
+    key: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'SubmitLog',
