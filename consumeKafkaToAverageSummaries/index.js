@@ -2,33 +2,56 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const { Category } = require('./models')
+const { Summary } = require('./models')
 const { initConsumer } = require('./helpers/initConsumer')
 const { initProducer, sendMessage } = require('./helpers/initProducer')
 const { customUpsert } = require('./helpers/upsert')
 
-async function checkCategory(producer, message) {
+async function averageSummaries(producer, message) {
     try {
         const value = JSON.parse(message?.value.toString());
         const key = message?.key.toString();
 
         const condition = {
-            Country: value?.country,
-            Sex: value?.gender,
+            Category_id: value?.category.id,
         };
+        const { summary, createdSummary } = await customUpsert(Summary, condition);
 
-        let category = await Category.findOne({ where: condition });
+        const fieldsToAverage = [
+            'Copied_or_moved_a_file_or_folder',
+            'Used_a_copy_and_paste_tool_to_duplicate_or_move_information_within_a_document',
+            'Sent_email_with_attached_file',
+            'Used_basic_arithmetic_formula_in_spreadsheet',
+            'Connected_and_installed_new_device',
+            'Found_downloaded_installed_and_configured_software',
+            'Created_electronic_presentation_with_presentation_software',
+            'Transferred_file_between_computer_and_other_device',
+            'Wrote_computer_program_in_any_programming_language',
+            'Performed_at_least_one_out_of_nine_activities'
+        ];
 
-        if (!category && process.env.NEW_CATEGORY !== '0') {
-            ({ category, createdCategory } = await customUpsert(Category, condition));
+        let updatedValues = {};
+        fieldsToAverage.forEach(field => {
+            const summaryValue = summary?.[field] ?? 0.0;
+            const newValue = value[field];
+
+            if (newValue !== undefined) {
+                averagedValue = createdSummary ? newValue : (summaryValue + newValue) / 2;
+                updatedValues[field] = averagedValue;
+            }
+        });
+
+        if (!createdSummary && Object.keys(updatedValues).length > 0) {
+            await Summary.update(updatedValues, { where: condition });
         }
 
-        if (category) {
-            value.category = category.dataValues;
-            await sendMessage(producer, process.env.TOPIC_PRODUCER, [{ key: key, value: JSON.stringify(value) }]);
-        } else {
-            console.error("Category not found! Please check NEW_CATEGORY env variable!");
-        }
+        console.log(updatedValues);
+        // if (category) {
+        //     value.category = category.dataValues;
+        //     await sendMessage(producer, process.env.TOPIC_PRODUCER, [{ key: key, value: JSON.stringify(value) }]);
+        // } else {
+        //     console.error("Category not found! Please check NEW_CATEGORY env variable!");
+        // }
     } catch (error) {
         console.error("Error checking category:", error);
     }
@@ -43,7 +66,7 @@ const consume = async function consumeTopic() {
 
     await consumer.run({
         eachMessage: async ({ topic, partition, message }) => {
-            checkCategory(producer, message)
+            averageSummaries(producer, message)
         },
     })
 }
