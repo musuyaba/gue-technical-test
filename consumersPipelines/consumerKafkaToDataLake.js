@@ -7,9 +7,9 @@ const { initConsumer } = require('./helpers/initConsumer')
 // const { initProducer } = require('./helpers/initProducer')
 
 async function insertSubmitLog(message) {
-    value = JSON.parse(message?.value.toString())
-    key = message?.key.toString()
-    SubmitLog.create({
+    let value = JSON.parse(message?.value.toString())
+    const key = message?.key.toString()
+    const submitLog = await SubmitLog.create({
         key: key,
         Name: value?.name,
         Address: value?.address,
@@ -27,7 +27,7 @@ async function insertSubmitLog(message) {
         Performed_at_least_one_out_of_nine_activities: value?.Performed_at_least_one_out_of_nine_activities
     })
 
-    console.log('Inserted message to database', message);
+    console.log('Inserted message to database', message, 'saved to database with id:', submitLog.id);
 }
 
 
