@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "pass",
-    "database": "gue-star",
-    "host": "127.0.0.1",
+    "username": "gue",
+    "password": "guePassword",
+    "database": "guedb",
+    "host": "postgresql_gue",
     "dialect": "postgres",
     "port": 5432
   }
