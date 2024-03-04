@@ -33,6 +33,11 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_JMX_PORT: ${KAFKA_JMX_PORT}
       KAFKA_JMX_HOSTNAME: localhost
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "${KAFKA_BROKER_INTERNAL_PORT}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
@@ -56,6 +61,25 @@ services:
       POSTGRES_USER: "${POSTGRESQL_USER}"
       POSTGRES_PASSWORD: "${POSTGRESQL_PASSWORD}"
       POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+
+  postgresql_gue:
+    image: postgres:latest
+    hostname: postgresql_gue
+    volumes:
+      - pg_gue_data:/var/lib/postgresql/data
+    ports:
+      - 15432:5432
+    environment:
+      POSTGRES_DB: "${POSTGRESQL_GUE_DB}"
+      POSTGRES_USER: "${POSTGRESQL_GUE_USER}"
+      POSTGRES_PASSWORD: "${POSTGRESQL_GUE_PASSWORD}"
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRESQL_GUE_USER} -d ${POSTGRESQL_GUE_DB} -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   conduktor-platform:
     image: conduktor/conduktor-platform:1.19.2
@@ -85,24 +109,88 @@ services:
     environment:
       CDK_CONSOLE-URL: "http://conduktor-platform:${CONDUKTOR_PLATFORM_PORT}"
 
-
   produce-ingestion:
     depends_on:
-      - conduktor-platform
+      broker1:
+        condition: service_healthy
     build: 
       context: produceIngestion
       dockerfile: Dockerfile
-    restart:
-      always
+    restart: always
 
-  # consumerKafkaToDatalake:
-  #   image: node:18-alpine
-  #   build: 
-  #     context: consumersPipelines
-  #   command: ["sh", "-c", "npm install && npm run consumerKafkaToDatalake"]
+  consumer-kafka-to-datalake:
+    depends_on:
+      broker1:
+        condition: service_healthy
+      postgresql_gue:
+        condition: service_healthy
+    build: 
+      context: consumersPipelines
+      dockerfile: Dockerfile
+    restart: always
+    command: ["sh", "-c", "npx sequelize db:migrate && node consumerKafkaToDataLake.js"]
 
+  consumer-kafka-to-check-category:
+    depends_on:
+      broker1:
+        condition: service_healthy
+      postgresql_gue:
+        condition: service_healthy
+    build: 
+      context: consumersPipelines
+      dockerfile: Dockerfile
+    restart: always
+    command: ["sh", "-c", "node consumerKafkaToCheckCategory.js"]
 
+  consumer-kafka-to-average-summaries:
+    depends_on:
+      broker1:
+        condition: service_healthy
+      postgresql_gue:
+        condition: service_healthy
+    build: 
+      context: consumersPipelines
+      dockerfile: Dockerfile
+    restart: always
+    command: ["sh", "-c", "node consumerKafkaToAverageSummaries.js"]
+
+  consumer-kafka-to-normalize-summaries-value:
+    depends_on:
+      broker1:
+        condition: service_healthy
+      postgresql_gue:
+        condition: service_healthy
+    build: 
+      context: consumersPipelines
+      dockerfile: Dockerfile
+    restart: always
+    command: ["sh", "-c", "node consumerKafkaToNormalizeSummariesValue.js"]
+
+  consumer-kafka-to-saved-activity-summaries:
+    depends_on:
+      broker1:
+        condition: service_healthy
+      postgresql_gue:
+        condition: service_healthy
+    build: 
+      context: consumersPipelines
+      dockerfile: Dockerfile
+    restart: always
+    command: ["sh", "-c", "node consumerKafkaToSavedActivitySummaries.js"]
+
+  consumer-kafka-to-update-summaries:
+    depends_on:
+      broker1:
+        condition: service_healthy
+      postgresql_gue:
+        condition: service_healthy
+    build: 
+      context: consumersPipelines
+      dockerfile: Dockerfile
+    restart: always
+    command: ["sh", "-c", "node consumerKafkaToUpdateSummaries.js"]
 
 volumes:
   pg_data:
+  pg_gue_data:
   conduktor_data:
