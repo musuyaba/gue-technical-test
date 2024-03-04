@@ -85,19 +85,24 @@ services:
     environment:
       CDK_CONSOLE-URL: "http://conduktor-platform:${CONDUKTOR_PLATFORM_PORT}"
 
-  consumer:
-    image: node:18-alpine
-    hostname: consumer
-    command: ["sh", "-c", "npm install && npm run start"]
 
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+  produce-ingestion:
     depends_on:
       - conduktor-platform
+    build: 
+      context: produceIngestion
+      dockerfile: Dockerfile
+    restart:
+      always
+
+  # consumerKafkaToDatalake:
+  #   image: node:18-alpine
+  #   build: 
+  #     context: consumersPipelines
+  #   command: ["sh", "-c", "npm install && npm run consumerKafkaToDatalake"]
+
+
+
 volumes:
   pg_data:
   conduktor_data:
