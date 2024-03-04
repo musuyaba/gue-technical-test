@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     Source: DataTypes.STRING,
     Year: DataTypes.STRING,
     Category_id: DataTypes.INTEGER,
+    count: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Summary',
