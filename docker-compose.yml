@@ -4,7 +4,6 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
-    container_name: zookeeper
     restart: always
     ports:
       - "${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}"
@@ -15,7 +14,6 @@ services:
   broker1:
     user: root
     hostname: broker1
-    container_name: broker1
     restart: on-failure
     image: confluentinc/cp-kafka:7.5.0
     depends_on:
@@ -39,20 +37,18 @@ services:
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.0
     hostname: schema-registry
-    container_name: schema-registry
     depends_on:
       - broker1
     ports:
       - "${SCHEMA_REGISTRY_PORT}:${SCHEMA_REGISTRY_PORT}"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker1:${KAFKA_BROKER_EXTERNAL_PORT},broker2:${KAFKA_BROKER_EXTERNAL_PORT_2}'
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker1:${KAFKA_BROKER_EXTERNAL_PORT}'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:${SCHEMA_REGISTRY_PORT}
 
   postgresql:
     image: postgres:latest
     hostname: postgresql
-    container_name: postgresql
     volumes:
       - pg_data:/var/lib/postgresql/data
     environment:
@@ -64,7 +60,6 @@ services:
   conduktor-platform:
     image: conduktor/conduktor-platform:1.19.2
     hostname: conduktor-platform
-    container_name: conduktor-platform
     depends_on:
       - postgresql
       - broker1
@@ -87,19 +82,16 @@ services:
 
   conduktor-monitoring:
     image: conduktor/conduktor-platform-cortex:1.19.2
-    container_name: conduktor-monitoring
     environment:
       CDK_CONSOLE-URL: "http://conduktor-platform:${CONDUKTOR_PLATFORM_PORT}"
 
   consumer:
     image: node:18-alpine
-    container_name: consumer
     hostname: consumer
     command: ["sh", "-c", "npm install && npm run start"]
 
   nginx:
     image: nginx:latest
-    container_name: nginx
     ports:
       - "80:80"
     volumes:
