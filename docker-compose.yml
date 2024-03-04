@@ -68,7 +68,7 @@ services:
     volumes:
       - pg_gue_data:/var/lib/postgresql/data
     ports:
-      - 15432:5432
+      - ${POSTGRESQL_GUE_PORT}:5432
     environment:
       POSTGRES_DB: "${POSTGRESQL_GUE_DB}"
       POSTGRES_USER: "${POSTGRESQL_GUE_USER}"
