@@ -42,13 +42,13 @@ async function averageSummaries(producer, message) {
                 updatedValues[field] = averagedValue;
             }
         });
-
-        // if (!createdSummary && Object.keys(updatedValues).length > 0) {
-        //     await Summary.update(updatedValues, { where: condition });
-        // }
-
+        
         if (summary) {
             value.summary = summary.dataValues;
+            value.updatedValues = updatedValues;
+            fieldsToAverage.forEach(element => {
+                delete value[element]
+            });
             await sendMessage(producer, process.env.TOPIC_AVERAGE, [{ key: key, value: JSON.stringify(value) }]);
         } else {
             console.error("Summary not found!");
