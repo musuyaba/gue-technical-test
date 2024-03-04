@@ -1,7 +1,9 @@
 .env
 *.db
-*.pdf
+Technical Test - Data Engineer v1.docx.pdf
 *.xlsx
 **/config/config.json
 
 **/node_modules
+
+*.drawio.bkp
