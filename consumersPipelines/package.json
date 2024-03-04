@@ -5,6 +5,11 @@
   "main": "index.js",
   "scripts": {
     "consumerKafkaToDatalake" : "npx nodemon consumerKafkaToDatalake.js",
+    "consumerKafkaToCheckCategory" : "npx nodemon consumerKafkaToCheckCategory.js",
+    "consumerKafkaToAverageSummaries" : "npx nodemon consumerKafkaToAverageSummaries.js",
+    "consumerKafkaToNormalizeSummariesValue" : "npx nodemon consumerKafkaToNormalizeSummariesValue.js",
+    "consumerKafkaToSavedActivitySummaries" : "npx nodemon consumerKafkaToSavedActivitySummaries.js",
+    "consumerKafkaToUpdateSummaries" : "npx nodemon consumerKafkaToUpdateSummaries.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
