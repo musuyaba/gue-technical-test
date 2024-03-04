@@ -33,19 +33,21 @@ async function averageSummaries(producer, message) {
         ];
 
         let updatedValues = {};
+        const newCount = summary?.count + 1
         fieldsToAverage.forEach(field => {
             const summaryValue = summary?.[field] ?? 0.0;
             const newValue = value[field];
 
             if (newValue !== undefined) {
-                averagedValue = createdSummary ? newValue : (summaryValue + newValue) / 2;
+                averagedValue = createdSummary ? newValue : ((summaryValue * summary?.count) + newValue) / newCount;
                 updatedValues[field] = averagedValue;
             }
         });
-        
+
         if (summary) {
             value.summary = summary.dataValues;
             value.updatedValues = updatedValues;
+            value.newCount = newCount;
             fieldsToAverage.forEach(element => {
                 delete value[element]
             });

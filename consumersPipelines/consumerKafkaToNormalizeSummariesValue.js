@@ -32,9 +32,6 @@ async function normalizeSummaries(producer, message) {
             }
         });
 
-        // if (!createdSummary && Object.keys(updatedValues).length > 0) {
-        //     await Summary.update(updatedValues, { where: condition });
-        // }
         
         await sendMessage(producer, process.env.TOPIC_NORMALIZE, [{ key: key, value: JSON.stringify(value) }]);
     } catch (error) {

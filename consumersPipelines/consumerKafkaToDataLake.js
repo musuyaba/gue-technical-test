@@ -27,7 +27,7 @@ async function insertSubmitLog(message) {
         Performed_at_least_one_out_of_nine_activities: value?.Performed_at_least_one_out_of_nine_activities
     })
 
-    console.log('Inserted message to database', message, 'saved to database with id:', submitLog.id);
+    console.log('Inserted message to database', message, 'saved to database with key:', key);
 }
 
 
